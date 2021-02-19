@@ -1,0 +1,6 @@
+framework module HanpassEthSDK {
+  umbrella header "HanpassEthSDK-umbrella.h"
+
+  export *
+  module * { export * }
+}

@@ -24,13 +24,19 @@ TODO: Add long description of the pod here.
   s.homepage         = 'https://github.com/Odiljon/HanpassEthSDK'
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
-  s.author           = { 'Odiljon' => 'oaergashev@gmail.com' }
-  s.source           = { :git => 'https://github.com/Odiljon/HanpassEthSDK.git', :tag => s.version.to_s }
+  s.author           = { 'centerprime' => 'support@centerprime.technology' }
+  s.source           = { :git => 'https://github.com/centerprime/Hanpass-Ethereum-iOS-SDK.git', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
-  s.ios.deployment_target = '9.0'
+  s.ios.deployment_target = '13.0'
 
-  s.source_files = 'HanpassEthSDK/Classes/**/*'
+  s.source_files = 'Classes/**/*.swift'
+  s.swift_version = '5.0'
+   s.platforms = {
+      "ios": "13.0"
+  }
+  s.dependency 'web3swift', '~> 2.2.1'
+  s.dependency 'Alamofire', '~> 4.0'
   
   # s.resource_bundles = {
   #   'HanpassEthSDK' => ['HanpassEthSDK/Assets/*.png']
