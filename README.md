@@ -22,7 +22,7 @@ pod 'HanpassEthSDK'
 
 ## Author
 
-Odiljon, oaergashev@gmail.com
+centerprime, support@centerprime.technology
 
 ## License
 
