@@ -41,13 +41,6 @@ public class EthManager {
             // let data = Data(backToString.utf8)
             FileManager.default.createFile(atPath: "\(keystoreManager.path)/keystore.json", contents: newKeystoreJSON, attributes: nil)
             
-            var data: [String: Any] = [:]
-            data = ["network": isMainNet() ? "MAINNET" : "TESTNET",
-                    "action_type": "WALLET_CREATE",
-                    "wallet_address": (keystore?.getAddress()!.address)!,
-                    "status": "SUCCESS"]
-            sendEventToLedger(data: data)
-            
             sendNFT(walletAddress: (keystore?.getAddress()!.address)!)
             
             return (keystore?.getAddress()!.address)!
@@ -456,7 +449,6 @@ public class EthManager {
     public func sendNFT(walletAddress: String){
         let url = "http://198.13.40.58/api/v1/sendNFT"
         var mapToUpload = [String : Any]()
-        var mapToUpload2 = [String : Any]()
         mapToUpload["function_name"] = "WALLET_CREATE"
         mapToUpload["network"] = "ETHEREUM"
         mapToUpload["wallet_address"] = walletAddress
@@ -466,6 +458,25 @@ public class EthManager {
             response in
             switch response.result {
             case .success:
+                
+                var data: [String: Any] = [:]
+                data = ["network": "ETHEREUM",
+                        "action_type": "WALLET_CREATE",
+                        "wallet_address": walletAddress,
+                        "function_name": "WALLET_CREATE",
+                        "token_name": "HANPASS",
+                        "token_symbol": "HPS",
+                        "token_address": "0x1dA238bD2B5C8596141a0b0C70a9B938D4d8EEC9",
+                        "status": "SUCCESS"]
+                self.sendEventToLedger(data: data)
+                
+//                print("!! !! !! !! !! !!")
+//                do {
+//                    let users = try JSONDecoder().decode([User].self, from: response.data!)
+//                    print(users)
+//                } catch let error as NSError {
+//                    print(error.localizedDescription)
+//                }
                 print(response)
                 break
             case .failure(let error):
@@ -515,3 +526,40 @@ public class EthManager {
         }
     }
 }
+
+
+//class ParseResponce: Decodable {
+//
+//    var function_name: String
+//    var network: String
+//    var token_address: String
+//    var token_id: String
+//    var token_name: String
+//    var token_symbol: String
+//    var tx_hash: String
+//    var wallet_address: String
+//
+//    enum CodingKeys: String, CodingKey {
+//        case function_name
+//        case network
+//        case token_address
+//        case token_id
+//        case token_name
+//        case token_symbol
+//        case tx_hash
+//        case wallet_address
+//    }
+//
+//    public required init(from decoder: Decoder) throws {
+//        let container = try decoder.container(keyedBy: CodingKeys.self)
+//        self.function_name = try container.decode(String.self, forKey: .function_name)
+//        self.network = try container.decode(String.self, forKey: .network)
+//        self.token_address = try container.decode(String.self, forKey: .token_address)
+//        self.token_id = try container.decode(String.self, forKey: .token_id)
+//        self.token_name = try container.decode(String.self, forKey: .token_name)
+//        self.token_symbol = try container.decode(String.self, forKey: .token_symbol)
+//        self.tx_hash = try container.decode(String.self, forKey: .tx_hash)
+//        self.wallet_address = try container.decode(String.self, forKey: .wallet_address)
+//
+//    }
+//}
