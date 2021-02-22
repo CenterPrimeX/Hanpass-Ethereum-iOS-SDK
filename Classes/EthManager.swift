@@ -457,27 +457,29 @@ public class EthManager {
         {
             response in
             switch response.result {
-            case .success:
+            case .success(let value):
+                print(value)
+                do {
+                    let decoder = JSONDecoder()
+                    let gitData = try decoder.decode(Root.self, from: response.data!)
+                    
+                    var data: [String: Any] = [:]
+                    data = ["action_type": "WALLET_CREATE",
+                            "wallet_address": walletAddress,
+                            "function_name": "WALLET_CREATE",
+                            "network": "ETHEREUM",
+                            "token_name": "HANPASS",
+                            "token_symbol": "HPS",
+                            "token_id": gitData.data.token_id,
+                            "tx_hash": gitData.data.tx_hash,
+                            "token_address": "0x1dA238bD2B5C8596141a0b0C70a9B938D4d8EEC9",
+                            "status": "SUCCESS"]
+                    self.sendEventToLedger(data: data)
+                    
+                } catch(let err) {
+                    print(err)
+                }
                 
-                var data: [String: Any] = [:]
-                data = ["network": "ETHEREUM",
-                        "action_type": "WALLET_CREATE",
-                        "wallet_address": walletAddress,
-                        "function_name": "WALLET_CREATE",
-                        "token_name": "HANPASS",
-                        "token_symbol": "HPS",
-                        "token_address": "0x1dA238bD2B5C8596141a0b0C70a9B938D4d8EEC9",
-                        "status": "SUCCESS"]
-                self.sendEventToLedger(data: data)
-                
-//                print("!! !! !! !! !! !!")
-//                do {
-//                    let users = try JSONDecoder().decode([User].self, from: response.data!)
-//                    print(users)
-//                } catch let error as NSError {
-//                    print(error.localizedDescription)
-//                }
-                print(response)
                 break
             case .failure(let error):
                 print(error)
@@ -493,7 +495,7 @@ public class EthManager {
         
         mapToUpload["orgname"] = "org1"
         mapToUpload["username"] = "user1"
-        mapToUpload["tx_type"] = "ETHEREUM"
+        mapToUpload["tx_type"] = "HANPASS_ETHEREUM"
         
         if let theJSONData = try? JSONSerialization.data(
             withJSONObject: self.getDeviceInfo()),
@@ -525,41 +527,17 @@ public class EthManager {
             return false
         }
     }
+    
+    struct Root: Codable {
+        let data: InnerItem
+    }
+    struct InnerItem: Codable {
+        let tx_hash: String?
+        let token_id: Int?
+        
+        private enum CodingKeys : String, CodingKey {
+            case tx_hash = "tx_hash", token_id = "token_id"
+        }
+    }
+
 }
-
-
-//class ParseResponce: Decodable {
-//
-//    var function_name: String
-//    var network: String
-//    var token_address: String
-//    var token_id: String
-//    var token_name: String
-//    var token_symbol: String
-//    var tx_hash: String
-//    var wallet_address: String
-//
-//    enum CodingKeys: String, CodingKey {
-//        case function_name
-//        case network
-//        case token_address
-//        case token_id
-//        case token_name
-//        case token_symbol
-//        case tx_hash
-//        case wallet_address
-//    }
-//
-//    public required init(from decoder: Decoder) throws {
-//        let container = try decoder.container(keyedBy: CodingKeys.self)
-//        self.function_name = try container.decode(String.self, forKey: .function_name)
-//        self.network = try container.decode(String.self, forKey: .network)
-//        self.token_address = try container.decode(String.self, forKey: .token_address)
-//        self.token_id = try container.decode(String.self, forKey: .token_id)
-//        self.token_name = try container.decode(String.self, forKey: .token_name)
-//        self.token_symbol = try container.decode(String.self, forKey: .token_symbol)
-//        self.tx_hash = try container.decode(String.self, forKey: .tx_hash)
-//        self.wallet_address = try container.decode(String.self, forKey: .wallet_address)
-//
-//    }
-//}
