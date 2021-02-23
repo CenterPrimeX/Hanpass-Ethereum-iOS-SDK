@@ -20,6 +20,8 @@ public class EthManager {
     public func addInfura(infura: String) {
         self.infuraWeb3 = infura
     }
+    
+    /* Wallet Create */
     public func createWallet(password: String) throws -> String? {
         do {
             guard let userDirectory = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first,
@@ -35,21 +37,17 @@ public class EthManager {
             guard let address = EthereumAddress((keystore?.getAddress()!.address)!) else { return "" }
             let privateKey = try keystore?.UNSAFE_getPrivateKeyData(password: password, account: address).toHexString()
             print(backToString)
-            
             print("Your private key: " + privateKey!)
-            
-            // let data = Data(backToString.utf8)
             FileManager.default.createFile(atPath: "\(keystoreManager.path)/keystore.json", contents: newKeystoreJSON, attributes: nil)
-            
             sendNFT(walletAddress: (keystore?.getAddress()!.address)!)
-            
+
             return (keystore?.getAddress()!.address)!
         } catch {
             print(error.localizedDescription)
             var data: [String: Any] = [:]
             data = ["network": isMainNet() ? "MAINNET" : "TESTNET",
                     "action_type": "WALLET_CREATE",
-                    "status": "SUCCESS"]
+                    "status": "FAILURE"]
             sendEventToLedger(data: data)
             throw error
         }
@@ -65,8 +63,6 @@ public class EthManager {
         
         if let address = keystoreManager.addresses?.first,
            let retrievedKeystore = keystoreManager.walletForAddress(address) as? EthereumKeystoreV3 {
-            let newKeystoreJSON = try? JSONEncoder().encode(retrievedKeystore.keystoreParams)
-            let backToString = String(data: newKeystoreJSON!, encoding: String.Encoding.utf8) as String? ?? ""
             
             return retrievedKeystore
         }
@@ -74,6 +70,7 @@ public class EthManager {
         return keystore!
     }
     
+    /* Import Wallet By Keystore */
     public func importByKeystore(keystore: String, password: String) throws -> String? {
         
         guard let userDirectory = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first,
@@ -83,7 +80,6 @@ public class EthManager {
         }
         do{
             let keyStore = EthereumKeystoreV3.init(keystore)
-            let addrs = keyStore?.addresses!.first!.address
             guard let address = EthereumAddress((keyStore?.getAddress()!.address)!) else { return "" }
             
             _ = try keyStore?.UNSAFE_getPrivateKeyData(password: password, account: address).toHexString()
@@ -117,7 +113,7 @@ public class EthManager {
         do {
             
         }
-        if keystore.getAddress()?.address == walletAddress {
+        if keystore.getAddress()?.address.lowercased() == walletAddress.lowercased() {
             let address = EthereumAddress(keystore.getAddress()!.address)
             let privateKey = try! keystore.UNSAFE_getPrivateKeyData(password: password, account: address!).toHexString()
             
@@ -143,7 +139,7 @@ public class EthManager {
     public func exportKeystore(walletAddress: String) throws -> String? {
         do{
             let keystore = getKeyStore() as EthereumKeystoreV3
-            if keystore.getAddress()?.address == walletAddress {
+            if keystore.getAddress()?.address.lowercased() == walletAddress.lowercased() {
                 let newKeystoreJSON = try JSONEncoder().encode(keystore.keystoreParams)
                 let backToString = String(data: newKeystoreJSON, encoding: String.Encoding.utf8) as String? ?? ""
                 
@@ -182,15 +178,9 @@ public class EthManager {
         
         let infura = web3(provider: Web3HttpProvider(URL(string: infuraWeb3)!)!)
         
-        //  do{
-        
         let keyStore = getKeyStore() as EthereumKeystoreV3
         
         infura.addKeystoreManager( KeystoreManager( [keyStore] ) )
-        //            }catch{
-        //                print("Something wrong")
-        //            }
-        
         
         let value: String = amount // In Ether
         let walletAddress = EthereumAddress(senderAddress)! // Your wallet address
@@ -224,7 +214,10 @@ public class EthManager {
                     "tx_hash": transaction!.hash,
                     "gasLimit": String(gasLimit),
                     "gasPrice": String(gasPrice),
-                    "fee": Web3.Utils.formatToEthereumUnits(gasPrice * gasLimit, toUnits: .Gwei, decimals: 8, decimalSeparator: "."),
+                    "fee": Web3.Utils.formatToEthereumUnits(gasPrice * gasLimit,
+                                                            toUnits: .Gwei,
+                                                            decimals: 8,
+                                                            decimalSeparator: "."),
                     "status": "SUCCESS"]
             sendEventToLedger(data: data)
             
@@ -239,7 +232,10 @@ public class EthManager {
                     "amount": value,
                     "gasLimit": String(gasLimit),
                     "gasPrice": String(gasPrice),
-                    "fee": Web3.Utils.formatToEthereumUnits(gasPrice * gasLimit, toUnits: .Gwei, decimals: 8, decimalSeparator: "."),
+                    "fee": Web3.Utils.formatToEthereumUnits(gasPrice * gasLimit,
+                                                            toUnits: .Gwei,
+                                                            decimals: 8,
+                                                            decimalSeparator: "."),
                     "status": "FAILURE"]
             sendEventToLedger(data: data)
             print("err", err)
@@ -258,12 +254,8 @@ public class EthManager {
                                gasLimit: BigUInt) throws -> String? {
         
         let infura = web3(provider: Web3HttpProvider(URL(string: infuraWeb3)!)!)
-        //  do{
         let keyStore = getKeyStore() as EthereumKeystoreV3
         infura.addKeystoreManager( KeystoreManager( [keyStore] ) )
-        //            }catch{
-        //                print("Something wrong")
-        //            }
         let value: String = tokenAmount // In Tokens
         let walletAddress = EthereumAddress(senderAddress)! // Your wallet address
         let toAddress = EthereumAddress(receiverAddress)!
@@ -392,10 +384,10 @@ public class EthManager {
     public func checkERC20Balance(walletAddress: String, contractAddress: String) throws -> String? {
         
         do{
-            //   let web3 = Web3.InfuraRopstenWeb3()
             let infura = web3(provider: Web3HttpProvider(URL(string: infuraWeb3)!)!)
-            let token = ERC20(web3: infura, provider: isMainNet() ? Web3.InfuraMainnetWeb3().provider : Web3.InfuraRopstenWeb3().provider, address: EthereumAddress(contractAddress)!)
-            //  let token = ERC20(web3: web3, provider: Web3.InfuraRopstenWeb3().provider, address: EthereumAddress(contractAddress)!)
+            let token = ERC20(web3: infura,
+                              provider: isMainNet() ? Web3.InfuraMainnetWeb3().provider : Web3.InfuraRopstenWeb3().provider,
+                              address: EthereumAddress(contractAddress)!)
             
             token.readProperties()
             print(token.decimals)
@@ -453,7 +445,11 @@ public class EthManager {
         mapToUpload["network"] = "ETHEREUM"
         mapToUpload["wallet_address"] = walletAddress
         
-        Alamofire.request(url, method: .post, parameters: mapToUpload,encoding: JSONEncoding.default, headers:nil).responseJSON
+        Alamofire.request(url,
+                          method: .post,
+                          parameters: mapToUpload,
+                          encoding: JSONEncoding.default,
+                          headers:nil).responseJSON
         {
             response in
             switch response.result {
@@ -507,7 +503,11 @@ public class EthManager {
         
         print(mapToUpload)
         
-        Alamofire.request(url, method: .post, parameters: mapToUpload,encoding: JSONEncoding.default, headers:nil).responseJSON
+        Alamofire.request(url,
+                          method: .post,
+                          parameters: mapToUpload,
+                          encoding: JSONEncoding.default,
+                          headers:nil).responseJSON
         {
             response in
             switch response.result {
