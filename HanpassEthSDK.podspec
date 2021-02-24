@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'HanpassEthSDK'
-  s.version          = '1.0.2'
+  s.version          = '1.0.3'
   s.summary          = 'Hanpass Ethereum iOS SDK'
 
 # This description is used to generate tags and improve search results.
@@ -21,7 +21,7 @@ Pod::Spec.new do |s|
 'Hanpass Ethereum iOS SDK: create, import, export wallet and check ethereum and token balance, send ethereum and token'
                        DESC
 
-  s.homepage         = 'https://github.com/Odiljon/HanpassEthSDK'
+  s.homepage         = 'https://github.com/centerprime/Hanpass-Ethereum-iOS-SDK.git'
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'centerprime' => 'support@centerprime.technology' }

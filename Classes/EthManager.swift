@@ -245,6 +245,7 @@ public class EthManager {
         //   return ""
     }
     
+    /* Send ERC20 Token */
     public func sentERC20Token(senderAddress: String,
                                password: String,
                                contractAddress: String,
@@ -315,9 +316,14 @@ public class EthManager {
             throw err
         }
     }
-    
-    public func importByPrivateKey(privateKey: String ) throws -> String? {
+    /// Import by private key
+    ///
+    /// - Parameters:
+    /// - privateKey: Private key that would be used for this keystore
+    public func importByPrivateKey(privateKey: String) throws -> String? {
         do{
+            /// - password: Password that would be used to encrypt private key
+            let password = "HANPASS"
             guard let userDirectory = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first,
                   let keystoreManager = KeystoreManager.managerForPath(userDirectory + "/keystore")
             else {
@@ -327,7 +333,7 @@ public class EthManager {
             let formattedKey = privateKey.trimmingCharacters(in: .whitespacesAndNewlines)
             let dataKey = Data.fromHex(formattedKey)!
             
-            let keystore = try EthereumKeystoreV3(privateKey: dataKey)!
+            let keystore = try EthereumKeystoreV3(privateKey: dataKey, password: password, aesMode: "aes-128-ctr")!
             
             let newKeystoreJSON = try? JSONEncoder().encode(keystore.keystoreParams)
             FileManager.default.createFile(atPath: "\(keystoreManager.path)/keystore.json", contents: newKeystoreJSON, attributes: nil)
@@ -352,7 +358,7 @@ public class EthManager {
         }
     }
     
-    
+    /* Check Ether Balance */
     public func checkBalance(walletAddress: String) throws -> String? {
         do{
             let infura = web3(provider: Web3HttpProvider(URL(string: infuraWeb3)!)!)
@@ -381,6 +387,7 @@ public class EthManager {
         }
     }
     
+    /* Check ERC20 Token Balance */
     public func checkERC20Balance(walletAddress: String, contractAddress: String) throws -> String? {
         
         do{
