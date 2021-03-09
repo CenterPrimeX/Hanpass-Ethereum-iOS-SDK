@@ -262,7 +262,7 @@ public class EthManager {
         let toAddress = EthereumAddress(receiverAddress)!
         let erc20ContractAddress = EthereumAddress(contractAddress)!
         let contract = infura.contract(Web3.Utils.erc20ABI, at: erc20ContractAddress, abiVersion: 2)!
-        let amount = Web3.Utils.parseToBigUInt(value, units: .eth)
+        
         var options = TransactionOptions.defaultOptions
         let gweiUnit = BigUInt(1000000000)
         options.from = walletAddress
@@ -270,8 +270,10 @@ public class EthManager {
         options.gasLimit = .manual(gasLimit)
         let method = "transfer"
         
+        
         let token = ERC20(web3: infura, provider: isMainNet() ? Web3.InfuraMainnetWeb3().provider : Web3.InfuraRopstenWeb3().provider, address: EthereumAddress(contractAddress)!)
         token.readProperties()
+        let amount = Web3.Utils.parseToBigUInt(value, decimals: Int(token.decimals))
         
         let tx = contract.write( method, parameters: [toAddress, amount!] as [AnyObject], extraData: Data(), transactionOptions: options)!
         do {

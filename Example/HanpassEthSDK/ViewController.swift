@@ -16,7 +16,9 @@ class ViewController: UIViewController {
         // Do any additional setup after loading the view, typically from a nib.
         
         let ethManager = EthManager()
-        ethManager.addInfura(infura: "https://ropsten.infura.io/v3/a396c3461ac048a59f389c7778f06689")
+       // ethManager.addInfura(infura: "https://ropsten.infura.io/v3/a396c3461ac048a59f389c7778f06689")
+        ethManager.addInfura(infura: "https://data-seed-prebsc-1-s1.binance.org:8545")
+        
         
         do{
             let wallet = try ethManager.createWallet(password: "12345")
